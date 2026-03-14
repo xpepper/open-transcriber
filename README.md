@@ -13,44 +13,493 @@ A local web application for transcribing university lectures with synchronized a
 - 🔍 **Duplicate detection** - automatically recognizes already-transcribed files
 - 🌍 **Multi-language** support (auto-detects language)
 
-## 🚀 Quick Start
+## ❓ Frequently Asked Questions
 
-### Prerequisites
+### Do I need an internet connection?
 
-- **Python 3.8 or higher**
-- **FFmpeg** (required for audio processing)
-  - macOS: `brew install ffmpeg`
-  - Windows: `choco install ffmpeg`
-  - Ubuntu/Debian: `sudo apt install ffmpeg`
+- **For setup:** Yes, to download Python packages and Whisper models
+- **For transcribing:** No, everything runs locally after setup
+- **For browser:** No, the application runs on your local machine
 
-### Installation
+### How accurate is the transcription?
 
-1. **Clone and navigate to the project** (or extract the archive)
-   ```bash
-   cd open-transcriber
-   ```
+Accuracy depends on several factors:
+- **Audio quality** - Clear, noise-free recordings work best
+- **Model size** - Larger models (medium, large-v3) are more accurate
+- **Language** - Works best with clear speech
+- **Background noise** - Minimize noise for best results
 
-2. **Run the setup script**
-   ```bash
-   python setup.py
+**Typical accuracy:**
+- Base model: ~85-95% for clear speech
+- Large-v3 model: ~95-98% for clear speech
+
+### Can I transcribe other languages besides Italian?
+
+Yes! Whisper supports 99 languages including:
+- English, Italian, Spanish, French, German
+- Chinese, Japanese, Korean, Arabic
+- And many more
+
+The language is auto-detected, but accuracy is best for the languages listed above.
+
+### How long does transcription take?
+
+Approximate times for a 10-minute audio file:
+- **Tiny model:** ~1 minute
+- **Base model:** ~2-3 minutes (recommended)
+- **Small model:** ~4-5 minutes
+- **Medium model:** ~8-10 minutes
+- **Large-v3 model:** ~15-20 minutes
+
+**Tip:** Use the base model for best balance of speed and accuracy.
+
+### Can I edit the transcription?
+
+Not directly in the current version, but you can:
+- Export the JSON file from `data/transcriptions/`
+- Edit it in a text editor
+- The transcription is stored as plain text in the JSON file
+
+Future versions may include an edit feature.
+
+### Where are my transcriptions stored?
+
+In the `data/transcriptions/` folder, organized by date:
+```
+data/transcriptions/
+└── 2025-03-14/
+    └── <transcription-id>/
+        ├── transcription.json  # Full transcript with timestamps
+        ├── metadata.json       # File information
+        └── audio.m4a          # Original audio file
+```
+
+Both the transcript and original audio are preserved.
+
+### Can I use this on multiple computers?
+
+Yes, but:
+- Each computer needs its own installation
+- Transcriptions are stored locally (not synced)
+- You can copy the `data/transcriptions/` folder between computers
+- Both computers need the same Whisper models installed
+
+### Is my data private?
+
+Yes! 100% private:
+- All processing happens on your computer
+- No data is sent to the cloud
+- No internet connection needed after setup
+- No tracking or analytics
+- Your lectures never leave your machine
+
+### What audio formats are supported?
+
+Supported formats include:
+- **MP3** - Most common
+- **M4A** - Apple devices
+- **WAV** - Uncompressed audio
+- **MP4** - Audio from video files
+- **OGG, WEBM** - Other formats
+
+### Can I transcribe video files?
+
+Not directly. You need to:
+1. Extract audio from video first
+2. Save as MP3/M4A/WAV
+3. Then upload to Open Transcriber
+
+**Tools to extract audio:**
+- macOS: Use QuickTime or online converters
+- Windows: Use VLC Media Player → Convert/Save
+- Online: Search for "video to audio converter"
+
+### How do I backup my transcriptions?
+
+Simply copy the entire `data/transcriptions/` folder:
+- **macOS:** Copy to external drive or cloud storage
+- **Windows:** Copy to USB drive or backup service
+- The folder contains all transcriptions and original audio
+
+**Tip:** Regular backups are recommended as these are your lecture notes!
+
+### Can I share transcriptions with others?
+
+Yes! To share a transcription:
+1. Navigate to `data/transcriptions/YYYY-MM-DD/<id>/`
+2. Share the `transcription.json` file
+3. The recipient can view it in any text editor
+4. To share with audio, include the `audio.m4a` file too
+
+The JSON format is human-readable and can be opened in any text editor.
+
+### What if transcription fails or is inaccurate?
+
+Try these solutions:
+1. **Use a larger model** (small, medium, or large-v3)
+2. **Improve audio quality** - reduce background noise
+3. **Specify language manually** - if auto-detect is wrong
+4. **Split long recordings** into shorter segments
+5. **Check audio format** - ensure it's not corrupted
+
+### Can I use this for commercial purposes?
+
+This tool is intended for personal educational use. For commercial use:
+- Check OpenAI Whisper's license
+- Consider your intended use case
+- Ensure compliance with your institution's policies
+
+## 🚀 Installation Guide
+
+Follow the step-by-step guide for your operating system:
+
+---
+
+### 🍎 macOS Installation
+
+#### Step 1: Install Homebrew (if not already installed)
+
+Open **Terminal** and run:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**Press Enter** when prompted and enter your password if asked.
+
+#### Step 2: Install FFmpeg
+
+In **Terminal**, run:
+
+```bash
+brew install ffmpeg
+```
+
+**Verification:** Type `ffmpeg -version` - you should see version information.
+
+#### Step 3: Verify Python Installation
+
+macOS comes with Python, but let's ensure you have Python 3.8+:
+
+```bash
+python3 --version
+```
+
+You should see **Python 3.8.0** or higher.
+
+**Note:** Always use `python3` (not `python`) on macOS.
+
+#### Step 4: Navigate to Project Directory
+
+```bash
+cd /path/to/open-transcriber
+```
+
+**Example:** If you extracted the file to Downloads:
+```bash
+cd ~/Downloads/open-transcriber
+```
+
+Or if you cloned from git:
+```bash
+cd ~/Documents/workspace/ai/open-transcriber
+```
+
+#### Step 5: Run Setup Script
+
+```bash
+python3 setup.py
+```
+
+This will:
+- ✅ Verify Python version
+- ✅ Check FFmpeg installation
+- ✅ Create necessary directories
+- ✅ Install Python packages (Flask, Whisper, etc.)
+- ✅ Download the "tiny" Whisper model (~39MB)
+
+**Expected output:**
+```
+============================================================
+🎓 Open Transcriber - Setup
+============================================================
+✅ Python version: 3.12
+✅ FFmpeg installed
+📦 Installing Python dependencies...
+✅ Dependencies installed successfully
+🎙️  Verifying Whisper installation...
+✅ Whisper installed successfully
+============================================================
+✅ Setup complete!
+============================================================
+```
+
+**If setup fails:**
+- Make sure you're in the correct directory (check with `ls`)
+- Ensure you have internet connection (for downloading packages)
+- Try running with sudo if you get permission errors: `sudo python3 setup.py`
+
+#### Step 6: Start the Application
+
+```bash
+python3 run.py
+```
+
+**Expected output:**
+```
+============================================================
+🎓 Open Transcriber
+============================================================
+
+🚀 Starting server...
+   Open http://localhost:5000 in your browser
+
+   Press Ctrl+C to stop the server
+============================================================
+```
+
+**Keep this Terminal window open!** The server needs to keep running.
+
+#### Step 7: Open in Browser
+
+Open Safari or Chrome and navigate to:
+
+```
+http://localhost:5000
+```
+
+You should see the Open Transcriber interface!
+
+---
+
+### 🪟 Windows Installation
+
+#### Step 1: Install Python 3
+
+1. Go to **[python.org](https://www.python.org/downloads/)**
+2. Click **Download Python 3.12.x** (or latest 3.x version)
+3. Run the installer
+
+**IMPORTANT:** During installation:
+- ✅ **Check the box** "Add Python to PATH"
+- Click "Install Now"
+
+4. **Verify installation:** Open **Command Prompt** and type:
+   ```cmd
+   python --version
    ```
    
-   This will:
-   - Check Python version
-   - Verify FFmpeg installation
-   - Create necessary directories
-   - Install Python dependencies
-   - Download the "tiny" Whisper model to verify installation
+   You should see **Python 3.8.0** or higher.
+   
+   **Note:** On Windows, use `python` (not `python3`).
 
-3. **Start the application**
-   ```bash
-   python run.py
+#### Step 2: Install FFmpeg
+
+You have two options:
+
+**Option A: Using Chocolatey (Recommended)**
+
+1. Open **Command Prompt as Administrator**
+   - Press `Windows Key`, type "cmd"
+   - Right-click "Command Prompt" → "Run as administrator"
+
+2. Install Chocolatey (if not already installed):
+   ```cmd
+   setx PATH "%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+   ```
+   Then run:
+   ```cmd
+   powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -s 256; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
    ```
 
-4. **Open your browser**
+3. Install FFmpeg:
+   ```cmd
+   choco install ffmpeg
    ```
-   http://localhost:5000
-   ```
+
+4. **Restart Command Prompt** to refresh PATH
+
+**Option B: Manual Installation**
+
+1. Download FFmpeg from **[ffmpeg.org](https://ffmpeg.org/download.html#build-windows)**
+2. Extract the ZIP file
+3. Move the extracted folder to `C:\ffmpeg`
+4. Add `C:\ffmpeg\bin` to your system PATH:
+   - Press `Windows Key`, type "environment variables"
+   - Click "Edit the system environment variables"
+   - Click "Environment Variables"
+   - Under "System variables", find "Path" and click "Edit"
+   - Click "New" and add: `C:\ffmpeg\bin`
+   - Click OK on all dialog boxes
+5. **Restart Command Prompt**
+
+**Verification:** In Command Prompt, type:
+```cmd
+ffmpeg -version
+```
+
+You should see version information.
+
+#### Step 3: Navigate to Project Directory
+
+In **Command Prompt**, navigate to where you extracted/opened the project:
+
+```cmd
+cd C:\path\to\open-transcriber
+```
+
+**Example:** If you extracted to Downloads:
+```cmd
+cd %USERPROFILE%\Downloads\open-transcriber
+```
+
+**Tip:** You can type `cd ` (with a space) and then drag the folder into the Command Prompt window to auto-fill the path.
+
+#### Step 4: Run Setup Script
+
+```cmd
+python setup.py
+```
+
+This will:
+- ✅ Verify Python version
+- ✅ Check FFmpeg installation
+- ✅ Create necessary directories
+- ✅ Install Python packages (Flask, Whisper, etc.)
+- ✅ Download the "tiny" Whisper model (~39MB)
+
+**Expected output:**
+```
+============================================================
+🎓 Open Transcriber - Setup
+============================================================
+✅ Python version: 3.12
+✅ FFmpeg installed
+📦 Installing Python dependencies...
+✅ Dependencies installed successfully
+🎙️  Verifying Whisper installation...
+✅ Whisper installed successfully
+============================================================
+✅ Setup complete!
+============================================================
+```
+
+**If setup fails:**
+- Make sure you're in the correct directory (check with `dir`)
+- Ensure you have internet connection
+- If you see "Access denied", run Command Prompt as Administrator
+
+#### Step 5: Start the Application
+
+```cmd
+python run.py
+```
+
+**Expected output:**
+```
+============================================================
+🎓 Open Transcriber
+============================================================
+
+🚀 Starting server...
+   Open http://localhost:5000 in your browser
+
+   Press Ctrl+C to stop the server
+============================================================
+```
+
+**Keep this Command Prompt window open!** The server needs to keep running.
+
+#### Step 6: Open in Browser
+
+Open Edge or Chrome and navigate to:
+
+```
+http://localhost:5000
+```
+
+You should see the Open Transcriber interface!
+
+---
+
+### 🐧 Linux (Ubuntu/Debian) Installation
+
+#### Step 1: Install FFmpeg
+
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+#### Step 2: Verify Python
+
+```bash
+python3 --version
+```
+
+#### Step 3: Navigate and Setup
+
+```bash
+cd /path/to/open-transcriber
+python3 setup.py
+python3 run.py
+```
+
+Then open `http://localhost:5000` in your browser.
+
+---
+
+### ✅ Installation Verification
+
+After installation, verify everything works:
+
+1. **Check the application is running:**
+   - Open your browser to `http://localhost:5000`
+   - You should see the Open Transcriber interface with a library view
+
+2. **Test with example audio:**
+   - Click "+ Upload New"
+   - Select "base" model
+   - Navigate to `examples/small-example.m4a`
+   - Wait for transcription (~30-60 seconds)
+   - Click "View" to see the synchronized player
+
+3. **Verify all features:**
+   - ✅ Audio plays correctly
+   - ✅ Words highlight during playback
+   - ✅ Clicking words jumps to that moment
+   - ✅ Keyboard shortcuts work (Space, ←, →)
+
+---
+
+### 🔄 Starting the Application (After Initial Installation)
+
+**Once setup is complete, you only need to do this each time:**
+
+#### macOS/Linux:
+```bash
+cd /path/to/open-transcriber
+python3 run.py
+```
+
+#### Windows:
+```cmd
+cd C:\path\to\open-transcriber
+python run.py
+```
+
+Then open `http://localhost:5000` in your browser.
+
+---
+
+### 🛑 Stopping the Application
+
+To stop the server:
+- Go to the Terminal/Command Prompt window where it's running
+- Press **Ctrl+C**
+- The window will show "Server has stopped"
+
+You can then close the window.
 
 ## 📖 Usage
 
@@ -141,38 +590,280 @@ data/transcriptions/
 
 ## 🔧 Troubleshooting
 
-### FFmpeg not found
+### Platform-Specific Issues
+
+#### macOS Issues
+
+**"command not found: python3"**
+- Python is not installed or not in PATH
+- Install from [python.org](https://www.python.org/downloads/macos/)
+- Or use Homebrew: `brew install python3`
+
+**"command not found: brew"**
+- Homebrew is not installed
+- Install from [brew.sh](https://brew.sh)
+- Run the install command in Terminal
+
+**"Permission denied" when running setup.py**
+- Run with sudo: `sudo python3 setup.py`
+- Enter your macOS password when prompted
+
+**FFmpeg not found after installing with Homebrew**
+- Restart your Terminal
+- Run: `hash -r`
+- Then try: `ffmpeg -version`
+
+**Port 5000 already in use (AirPlay often uses this port)**
+- Edit `run.py` and change port 5000 to 5001:
+  ```python
+  app.run(host='127.0.0.1', port=5001, debug=True)
+  ```
+- Then navigate to `http://localhost:5001`
+
+**Application runs but browser shows "Unable to connect"**
+- Check that Terminal shows server is running
+- Try: `http://127.0.0.1:5000` instead of `http://localhost:5000`
+- Check firewall settings (System Preferences → Security & Privacy → Firewall)
+
+---
+
+#### Windows Issues
+
+**"python is not recognized as an internal or external command"**
+- Python is not in your PATH
+- Reinstall Python and **check "Add Python to PATH"**
+- Or manually add Python to PATH:
+  1. Search for "Environment Variables" in Windows
+  2. Click "Edit the system environment variables"
+  3. Click "Environment Variables"
+  4. Under "System variables", find "Path" and click "Edit"
+  5. Add Python's installation path (usually `C:\Python312\` and `C:\Python312\Scripts\`)
+  6. Click OK and **restart Command Prompt**
+
+**"ffmpeg is not recognized as an internal or external command"**
+- FFmpeg is not in your PATH
+- Reinstall FFmpeg and ensure it's added to PATH (see Step 2 in Windows installation)
+- Restart Command Prompt after installation
+- Verify with: `ffmpeg -version`
+
+**"Access denied" when running setup.py**
+- Right-click Command Prompt and select "Run as administrator"
+- Then run: `python setup.py`
+
+**"pip is not recognized"**
+- Python was not added to PATH during installation
+- Reinstall Python with "Add Python to PATH" checked
+- Or use `python -m pip` instead of `pip`
+
+**ModuleNotFoundError: No module named 'flask'**
+- Dependencies were not installed
+- Run: `python setup.py` again
+- Or manually install: `pip install -r requirements.txt`
+
+**Firewall blocking the application**
+- When you see Windows Firewall alert, click "Allow access"
+- Or manually allow Python in Windows Defender Firewall:
+  1. Search for "Windows Defender Firewall"
+  2. Click "Allow an app through Windows Defender Firewall"
+  3. Click "Change settings" → "Allow another app"
+  4. Browse to `python.exe` and add it
+
+**Server starts but browser shows "This site can't be reached"**
+- Try `http://127.0.0.1:5000` instead of `http://localhost:5000`
+- Check Windows Firewall settings
+- Temporarily disable antivirus to test
+
+---
+
+### General Issues
+
+#### FFmpeg not found
+**Install FFmpeg for your system:**
+
+**macOS:**
 ```bash
-# macOS
 brew install ffmpeg
+```
 
-# Windows (with Chocolatey)
+**Windows (Chocolatey):**
+```cmd
 choco install ffmpeg
+```
 
-# Ubuntu/Debian
+**Windows (Manual):**
+1. Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+2. Add to PATH as shown in Windows installation guide
+
+**Ubuntu/Debian:**
+```bash
 sudo apt update && sudo apt install ffmpeg
 ```
 
-### Port 5000 already in use
-Edit `run.py` and change the port:
-```python
-app.run(host='127.0.0.1', port=5001, debug=True)
+**Verification:**
+```bash
+ffmpeg -version
 ```
 
-### Transcription is slow
-- Try a smaller/faster model (tiny or base)
+---
+
+#### Port 5000 already in use
+
+**Symptoms:** Error message "Address already in use" or "Port 5000 is already in use"
+
+**Solutions:**
+
+1. **Use a different port** - Edit `run.py`:
+   ```python
+   app.run(host='127.0.0.1', port=5001, debug=True)
+   ```
+   Then navigate to `http://localhost:5001`
+
+2. **Kill the process using port 5000:**
+   
+   **macOS/Linux:**
+   ```bash
+   lsof -ti:5000 | xargs kill -9
+   ```
+   
+   **Windows:**
+   ```cmd
+   netstat -ano | findstr :5000
+   taskkill /PID <PID_NUMBER> /F
+   ```
+
+---
+
+#### Transcription is slow
+
+**Solutions:**
+- Use a smaller/faster model (tiny or base)
 - Ensure you have sufficient RAM (8GB+ recommended)
 - Close other applications to free up resources
+- On Windows, close unnecessary background apps
+- Process shorter audio files (split long lectures into smaller parts)
 
-### Poor transcription accuracy
+**Expected transcription times (approximate):**
+- 10-minute file with "base" model: ~2-3 minutes
+- 10-minute file with "tiny" model: ~1 minute
+- 10-minute file with "large-v3" model: ~10-15 minutes
+
+---
+
+#### Poor transcription accuracy
+
+**Solutions:**
 - Use a larger model (small, medium, or large-v3)
-- Ensure audio quality is good
+- Ensure audio quality is good (clear recording, minimal background noise)
 - Try specifying the language manually if auto-detection is wrong
+- For Italian lectures, the model should auto-detect correctly
+- Position microphone closer to speaker for better audio quality
 
-### Out of memory errors
-- Use a smaller model
+---
+
+#### Out of memory errors
+
+**Symptoms:** Application crashes, "MemoryError", or system becomes very slow
+
+**Solutions:**
+- Use a smaller model (tiny or base)
 - Process shorter audio files
 - Close other applications
+- Restart your computer before transcribing long files
+- On Windows, check Task Manager for memory usage
+- On macOS, check Activity Monitor for memory usage
+
+---
+
+#### Setup script fails
+
+**Symptoms:** Error during `python setup.py`
+
+**Solutions:**
+
+1. **Check internet connection** - Required for downloading packages
+2. **Verify Python version:** `python3 --version` (macOS) or `python --version` (Windows)
+3. **Manually install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Install FFmpeg first** if setup fails at FFmpeg check
+5. **Run with admin/sudo privileges:**
+   - macOS/Linux: `sudo python3 setup.py`
+   - Windows: Run Command Prompt as Administrator
+
+---
+
+#### Audio player not working
+
+**Symptoms:** Audio doesn't play or controls don't respond
+
+**Solutions:**
+- Try a different browser (Chrome recommended)
+- Update your browser to the latest version
+- Check browser console for errors (F12 → Console tab)
+- Ensure audio file format is supported (MP3, M4A, WAV)
+- Clear browser cache and reload page
+- Try playing the audio file directly in your browser (drag file into browser)
+
+---
+
+#### Transcript not showing
+
+**Symptoms:** Transcription completes but no text appears
+
+**Solutions:**
+- Open browser console (F12) to check for JavaScript errors
+- Refresh the page
+- Check if transcription JSON was created in `data/transcriptions/`
+- Verify transcription completed successfully (no error messages)
+- Try transcribing the file again
+
+---
+
+#### Application crashes or freezes
+
+**Symptoms:** Application stops responding or window closes
+
+**Solutions:**
+- Check available RAM (close other apps if needed)
+- Use a smaller Whisper model
+- Try transcribing a shorter audio file
+- Check Terminal/Command Prompt for error messages
+- Restart the application
+- Restart your computer if problem persists
+
+---
+
+### Getting Help
+
+If issues persist:
+
+1. **Check the error message** - Read it carefully, it often points to the problem
+2. **Verify your installation:**
+   - macOS/Linux: `python3 test_structure.py`
+   - Windows: `python test_structure.py`
+3. **Check system resources:** RAM, disk space, CPU usage
+4. **Try the example audio files** to rule out file-specific issues
+5. **Consult platform-specific sections above** for your OS
+6. **Ensure all prerequisites are installed** (Python, FFmpeg)
+
+**Useful diagnostic commands:**
+
+**macOS:**
+```bash
+python3 --version
+ffmpeg -version
+python3 test_structure.py
+```
+
+**Windows:**
+```cmd
+python --version
+ffmpeg -version
+python test_structure.py
+```
+
+These will help identify which component is causing issues.
 
 ## 🎯 Keyboard Shortcuts
 
@@ -182,16 +873,43 @@ app.run(host='127.0.0.1', port=5001, debug=True)
 
 ## 📊 System Requirements
 
-**Minimum:**
-- Python 3.8+
-- 4GB RAM
-- 2GB free disk space
-- FFmpeg installed
+### Minimum Requirements
 
-**Recommended:**
-- 8GB+ RAM
-- SSD for faster model loading
-- 4GB+ free disk space (for larger models)
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **Python** | 3.8+ | 3.10+ |
+| **RAM** | 4GB | 8GB+ |
+| **Disk Space** | 2GB | 4GB+ |
+| **Processor** | Any modern CPU | Multi-core CPU |
+| **Operating System** | macOS 10.14+, Windows 10+, Ubuntu 18.04+ | Latest versions |
+
+### Why These Requirements?
+
+- **Python 3.8+**: Required for Whisper and modern libraries
+- **4GB RAM**: Minimum for running base model and processing audio
+- **8GB+ RAM**: Recommended for large models (medium, large-v3) and long audio files
+- **2GB disk space**: For Python packages, Whisper models, and transcriptions
+- **4GB+ disk space**: If using multiple Whisper models or storing many transcriptions
+
+### Performance by Model
+
+| Model | RAM Usage | Disk Space | Transcription Speed* |
+|-------|-----------|------------|---------------------|
+| **tiny** | ~1GB | 39MB | ⚡⚡⚡ Fastest (1x) |
+| **base** | ~2GB | 74MB | ⚡⚡ Fast (2x slower than tiny) |
+| **small** | ~3GB | 244MB | ⚡ Moderate (4x slower than tiny) |
+| **medium** | ~5GB | 769MB | 🐢 Slow (8x slower than tiny) |
+| **large-v3** | ~8GB+ | 1.5GB | 🐢🐢 Slowest (16x slower than tiny) |
+
+*Approximate for 10-minute audio on modern CPU
+
+### Tips for Better Performance
+
+1. **Use SSD storage** - Faster model loading and file access
+2. **Close other apps** - Free up RAM for transcription
+3. **Use appropriate model** - Base model is best for most use cases
+4. **Process shorter files** - Split long lectures into 30-minute chunks
+5. **Restart regularly** - Especially on Windows, to clear memory
 
 ## 🔒 Privacy
 
