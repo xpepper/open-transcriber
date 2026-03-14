@@ -11,8 +11,10 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-TRANSCRIPTIONS_DIR = Path("data/transcriptions")
-UPLOADS_DIR = Path("uploads")
+# Get the project root (parent of backend directory)
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
+TRANSCRIPTIONS_DIR = PROJECT_ROOT / "data" / "transcriptions"
+UPLOADS_DIR = PROJECT_ROOT / "uploads"
 
 
 def ensure_directories():
@@ -159,7 +161,7 @@ def load_metadata(transcription_id):
 
 
 def get_audio_path(transcription_id):
-    """Get the path to the audio file for a transcription"""
+    """Get the absolute path to the audio file for a transcription"""
     ensure_directories()
 
     # Search in all date folders
@@ -172,7 +174,8 @@ def get_audio_path(transcription_id):
             # Look for audio file
             for file in transcription_path.iterdir():
                 if file.suffix in [".mp3", ".m4a", ".wav", ".mp4", ".mpeg"]:
-                    return file
+                    # Return absolute path
+                    return file.resolve()
 
     return None
 
