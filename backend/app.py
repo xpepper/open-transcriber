@@ -120,6 +120,7 @@ def api_transcribe():
         # Get model selection
         model_name = request.form.get("model", "base")
         language = request.form.get("language", None)
+        word_timestamps = request.form.get("word_timestamps", "true").lower() == "true"
 
         # Save to temporary location
         temp_path = save_temp_file(file)
@@ -143,7 +144,9 @@ def api_transcribe():
 
             # Transcribe
             print(f"Starting transcription with model: {model_name}")
-            result = transcribe_audio(str(temp_path), model_name, language)
+            result = transcribe_audio(
+                str(temp_path), model_name, language, word_timestamps
+            )
 
             # Save to permanent storage
             transcription_id, is_duplicate = save_transcription(

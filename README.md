@@ -541,6 +541,26 @@ Model base loaded successfully on mps
 - Base model: ~2-3 minutes for 10-minute audio (vs ~8-10 minutes on CPU)
 - Large-v3 model: ~10-15 minutes for 10-minute audio (vs ~60+ minutes on CPU)
 
+**⚠️ Apple Silicon Limitations:**
+
+MPS (Apple Silicon GPU) has a known limitation with **word-level timestamps** for larger models (small, medium, large-v3):
+
+- **Tiny & Base models:** Work perfectly with word timestamps ✅
+- **Small/Medium/Large models:** May need CPU fallback for word alignment
+
+**What happens:**
+- Transcription will succeed with GPU acceleration
+- Word timestamps may use CPU fallback (slower but works)
+- You'll see a message: "Falling back to CPU for alignment"
+
+**Workaround if needed:**
+If you encounter errors with large models, you can:
+1. Use the "tiny" or "base" model (recommended for most use cases)
+2. Accept CPU fallback (slower but complete)
+3. Disable word timestamps (segment-level timestamps still work)
+
+**Recommended:** Use "base" model for best balance of speed, accuracy, and features on Apple Silicon.
+
 ---
 
 ### 🪟 NVIDIA GPU - Windows

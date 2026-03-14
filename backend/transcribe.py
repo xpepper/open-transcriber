@@ -126,7 +126,10 @@ def load_model(model_name: str = "base"):
 
 
 def transcribe_audio(
-    file_path: str, model_name: str = "base", language: Optional[str] = None
+    file_path: str,
+    model_name: str = "base",
+    language: Optional[str] = None,
+    word_timestamps: bool = True,
 ) -> Dict[str, Any]:
     """
     Transcribe an audio file using Whisper
@@ -135,6 +138,7 @@ def transcribe_audio(
         file_path: Path to audio file
         model_name: Whisper model to use (tiny, base, small, medium, large-v3)
         language: Language code (e.g., 'it', 'en') or None for auto-detect
+        word_timestamps: Whether to include word-level timestamps (default: True)
 
     Returns:
         Dictionary with transcription result including segments and word timestamps
@@ -144,15 +148,61 @@ def transcribe_audio(
     # Load model
     model = load_model(model_name)
 
-    # Transcribe with word-level timestamps
-    result = model.transcribe(
-        file_path,
-        word_timestamps=True,
-        language=language,
-        verbose=False,  # Set to True for debugging
-    )
+    # Check if using MPS (Apple Silicon) for word timestamps
+    # MPS doesn't support float64 which is needed for word alignment
+    original_device = model.device
 
-    print(f"Transcription complete: {len(result.get('segments', []))} segments")
+    if not word_timestamps:
+        print("Word timestamps disabled by user request")
+        result = model.transcribe(
+            file_path,
+            word_timestamps=False,
+            language=language,
+            verbose=False,
+        )
+    elif DEVICE == "mps" and model_name in ["small", "medium", "large-v3"]:
+        print("⚠️  MPS has limited word timestamp support for large models")
+        print("   Attempting transcription with word timestamps...")
+        try:
+            result = model.transcribe(
+                file_path,
+                word_timestamps=True,
+                language=language,
+                verbose=False,
+            )
+        except TypeError as e:
+            if "float64" in str(e):
+                print("   MPS doesn't support word timestamps for this model")
+                print("   Falling back to CPU for alignment (slower)...")
+                model = model.to("cpu")
+                result = model.transcribe(
+                    file_path,
+                    word_timestamps=True,
+                    language=language,
+                    verbose=False,
+                )
+                model = model.to(original_device)
+            else:
+                raise e
+    else:
+        # Transcribe with word-level timestamps
+        result = model.transcribe(
+            file_path,
+            word_timestamps=True,
+            language=language,
+            verbose=False,
+        )
+
+    segments_count = len(result.get("segments", []))
+    has_words = (
+        result.get("segments", []) and "words" in result["segments"][0]
+        if segments_count > 0
+        else False
+    )
+    print(
+        f"Transcription complete: {segments_count} segments"
+        + (f" with word timestamps" if has_words else "")
+    )
 
     return result
 
