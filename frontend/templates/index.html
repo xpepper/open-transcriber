@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Transcriber - Lecture Transcription</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Library View -->
+        <div id="library-view" class="view active">
+            <header class="app-header">
+                <h1>🎓 Open Transcriber</h1>
+                <button id="upload-btn" class="btn btn-primary">+ Upload New</button>
+            </header>
+            
+            <div class="controls-section">
+                <div class="model-selector">
+                    <label for="model-select">Transcription Model:</label>
+                    <select id="model-select">
+                        <option value="tiny">Tiny (fastest, less accurate) ~39MB</option>
+                        <option value="base" selected>Base (balanced) ~74MB</option>
+                        <option value="small">Small (more accurate) ~244MB</option>
+                        <option value="medium">Medium (very accurate) ~769MB</option>
+                        <option value="large-v3">Large v3 (best accuracy) ~1.5GB</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="transcriptions-list" class="transcriptions-list">
+                <!-- Populated via JavaScript -->
+                <div class="empty-state">
+                    <h2>📚 No lectures yet</h2>
+                    <p>Upload your first audio recording to get started</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Viewer View -->
+        <div id="viewer-view" class="view hidden">
+            <header class="app-header viewer-header">
+                <button id="back-btn" class="btn btn-secondary">← Back to Library</button>
+                <h1 id="lecture-title">Lecture Title</h1>
+                <button id="delete-btn" class="btn btn-danger">Delete</button>
+            </header>
+            
+            <div id="viewer-content" class="viewer-content">
+                <div id="audio-panel" class="audio-panel">
+                    <div class="audio-info">
+                        <h3 id="audio-title">Audio Player</h3>
+                        <div class="audio-metadata" id="audio-metadata"></div>
+                    </div>
+                    
+                    <audio id="audio-player" controls></audio>
+                    
+                    <div class="audio-controls">
+                        <button id="rew-btn" class="btn btn-control" title="Rewind 5 seconds">
+                            ⏪ -5s
+                        </button>
+                        <button id="play-btn" class="btn btn-control" title="Play/Pause">
+                            ▶️ Play
+                        </button>
+                        <button id="fwd-btn" class="btn btn-control" title="Forward 5 seconds">
+                            +5s ⏩
+                        </button>
+                        <span id="time-display">0:00 / 0:00</span>
+                    </div>
+                    
+                    <div class="tips">
+                        <p>💡 <strong>Tip:</strong> Click any word to jump to that moment</p>
+                        <p>⌨️ <strong>Keyboard:</strong> Space = Play/Pause, ←/→ = Skip 5s</p>
+                    </div>
+                </div>
+                
+                <div id="transcript-panel" class="transcript-panel">
+                    <h3>📝 Transcript</h3>
+                    <div id="transcript-content">
+                        <!-- Populated via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📁 Upload Audio File</h2>
+                <button id="close-modal" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="drop-zone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <p>📤 Drag and drop your audio file here</p>
+                        <p class="drop-zone-or">or</p>
+                        <button id="browse-btn" class="btn btn-secondary">Browse Files</button>
+                        <input type="file" id="file-input" accept="audio/*" hidden>
+                        <p class="file-types">Supported: MP3, M4A, WAV, etc.</p>
+                    </div>
+                </div>
+                
+                <div id="upload-progress" class="upload-progress hidden">
+                    <div class="progress-content">
+                        <div class="spinner"></div>
+                        <h3>Transcribing...</h3>
+                        <p>This may take a few minutes depending on the file length and model.</p>
+                        <p class="progress-note">Please keep this tab open</p>
+                    </div>
+                </div>
+                
+                <div id="duplicate-message" class="duplicate-message hidden">
+                    <div class="duplicate-content">
+                        <h3>♻️ File Already Transcribed</h3>
+                        <p>This audio file has already been transcribed.</p>
+                        <div class="duplicate-actions">
+                            <button id="view-duplicate-btn" class="btn btn-primary">View Existing</button>
+                            <button id="cancel-duplicate-btn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>🗑️ Delete Lecture?</h2>
+                <button id="close-delete-modal" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <p>Are you sure you want to delete this lecture? This action cannot be undone.</p>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+                    <button id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/player.js"></script>
+</body>
+</html>
