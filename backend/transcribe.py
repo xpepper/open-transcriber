@@ -1,22 +1,99 @@
 """
 Transcription service using OpenAI Whisper
-Handles model loading and audio transcription
+Handles model loading and audio transcription with GPU acceleration
 """
 
 import whisper
 import os
+import torch
 from typing import Dict, Any, Optional
 
 # Model cache to avoid reloading models
 model_cache = {}
 
+
+# Detect available hardware acceleration
+def get_device():
+    """
+    Automatically detect and return the best available device
+    Priority: CUDA (NVIDIA) > MPS (Apple Silicon) > CPU
+    """
+    if torch.cuda.is_available():
+        device = "cuda"
+        print(f"🎮 Using NVIDIA GPU (CUDA)")
+        print(f"   GPU: {torch.cuda.get_device_name(0)}")
+        print(
+            f"   VRAM: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB"
+        )
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        device = "mps"
+        print(f"🍎 Using Apple Silicon GPU (MPS)")
+    else:
+        device = "cpu"
+        print(f"💻 Using CPU (no GPU detected)")
+
+    return device
+
+
+# Global device variable
+DEVICE = get_device()
+
 AVAILABLE_MODELS = [
-    {"name": "tiny", "description": "Tiny (fastest, less accurate)", "size_mb": 39},
-    {"name": "base", "description": "Base (balanced)", "size_mb": 74},
-    {"name": "small", "description": "Small (more accurate)", "size_mb": 244},
-    {"name": "medium", "description": "Medium (very accurate)", "size_mb": 769},
-    {"name": "large-v3", "description": "Large v3 (best accuracy)", "size_mb": 1550},
+    {
+        "name": "tiny",
+        "description": "Tiny (fastest, less accurate)",
+        "size_mb": 39,
+        "gpu_ram_mb": 500,
+    },
+    {
+        "name": "base",
+        "description": "Base (balanced)",
+        "size_mb": 74,
+        "gpu_ram_mb": 1000,
+    },
+    {
+        "name": "small",
+        "description": "Small (more accurate)",
+        "size_mb": 244,
+        "gpu_ram_mb": 2000,
+    },
+    {
+        "name": "medium",
+        "description": "Medium (very accurate)",
+        "size_mb": 769,
+        "gpu_ram_mb": 5000,
+    },
+    {
+        "name": "large-v3",
+        "description": "Large v3 (best accuracy)",
+        "size_mb": 1550,
+        "gpu_ram_mb": 10000,
+    },
 ]
+
+
+def get_device_info():
+    """Get information about the current device"""
+    info = {
+        "device": DEVICE,
+        "device_name": None,
+        "available_memory_gb": None,
+    }
+
+    if DEVICE == "cuda":
+        info["device_name"] = torch.cuda.get_device_name(0)
+        info["available_memory_gb"] = (
+            torch.cuda.get_device_properties(0).total_memory / 1024**3
+        )
+    elif DEVICE == "mps":
+        info["device_name"] = "Apple Silicon GPU"
+        # MPS doesn't expose memory info easily
+        info["available_memory_gb"] = "N/A (unified memory)"
+    else:
+        info["device_name"] = "CPU"
+        info["available_memory_gb"] = "N/A"
+
+    return info
 
 
 def get_available_models():
@@ -25,11 +102,25 @@ def get_available_models():
 
 
 def load_model(model_name: str = "base"):
-    """Load a Whisper model with caching"""
+    """Load a Whisper model with caching and GPU acceleration"""
     if model_name not in model_cache:
         print(f"Loading Whisper model: {model_name}")
-        model_cache[model_name] = whisper.load_model(model_name)
-        print(f"Model {model_name} loaded successfully")
+
+        # Load model on detected device
+        model = whisper.load_model(model_name, device=DEVICE)
+
+        # Move model to device
+        model = model.to(DEVICE)
+
+        model_cache[model_name] = model
+        print(f"Model {model_name} loaded successfully on {DEVICE}")
+
+        # Show memory info for GPU
+        if DEVICE == "cuda":
+            memory_allocated = torch.cuda.memory_allocated(0) / 1024**2
+            print(f"   VRAM allocated: {memory_allocated:.1f} MB")
+        elif DEVICE == "mps":
+            print(f"   GPU acceleration enabled")
 
     return model_cache[model_name]
 

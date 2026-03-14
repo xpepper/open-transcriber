@@ -3,3 +3,7 @@ openai-whisper==20250625
 ffmpeg-python==0.2.0
 torch==2.10.0
 torchaudio==2.10.0
+
+# For NVIDIA GPU acceleration (Windows/Linux):
+# Replace torch with: torch==2.10.0+cu121 --index-url https://download.pytorch.org/whl/cu121
+# See README.md for GPU installation instructions
