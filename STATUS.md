@@ -80,20 +80,6 @@ All features from the plan have been successfully implemented!
 
 ---
 
-## 🧪 Ready for Testing
-
-The application is ready for testing with provided example files:
-
-1. **examples/small-example.m4a** (4.1MB)
-   - Quick testing (~30-60 seconds transcription time)
-   - Perfect for development testing
-
-2. **examples/example-audio.m4a** (41MB)
-   - Real-world lecture length
-   - Full integration testing
-
----
-
 ## 🚀 Quick Start
 
 ```bash

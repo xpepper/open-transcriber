@@ -157,14 +157,6 @@ You should see the Open Transcriber interface with:
 
 ## 🎤 Step 6: Test with Example Audio
 
-The project includes example audio files for testing:
-
-1. Click **"+ Upload New"**
-2. Select the **"base"** model (recommended)
-3. Navigate to `examples/small-example.m4a`
-4. Wait for transcription to complete (~30-60 seconds)
-5. Click **"View"** to see the transcription with audio player
-
 ## 🎉 Congratulations!
 
 You're now ready to transcribe your lectures!
@@ -172,7 +164,7 @@ You're now ready to transcribe your lectures!
 ## 📚 Next Steps
 
 - Read the [README.md](README.md) for usage instructions
-- Try uploading your own lecture recordings
+- Upload your first lecture recording
 - Experiment with different Whisper models
 - Explore the keyboard shortcuts for efficient navigation
 

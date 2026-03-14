@@ -43,6 +43,7 @@ All core features have been successfully implemented according to the plan.
 - [x] Word-level timestamps from Whisper
 - [x] Responsive UI for different screen sizes
 - [x] Cross-platform (macOS, Windows, Linux)
+- [x] Automatic GPU acceleration (CUDA, MPS)
 
 ---
 
@@ -67,9 +68,6 @@ open-transcriber/
 ├── data/
 │   └── transcriptions/     # Stored transcriptions (by date)
 ├── uploads/                # Temporary upload location
-├── examples/               # Example audio files
-│   ├── small-example.m4a   # 4.1MB (testing)
-│   └── example-audio.m4a   # 41MB (real lecture)
 ├── requirements.txt        # Python dependencies
 ├── setup.py               # Installation script
 ├── run.py                 # Application entry point
@@ -126,15 +124,6 @@ open-transcriber/
 
 ---
 
-## 🧪 Testing Ready
-
-The application is ready for testing with the provided example files:
-
-1. **small-example.m4a** (4.1MB) - Quick testing (~30-60 seconds)
-2. **example-audio.m4a** (41MB) - Real-world testing
-
----
-
 ## 🚀 Next Steps for User
 
 1. **Install dependencies:**
@@ -152,13 +141,7 @@ The application is ready for testing with the provided example files:
    http://localhost:5000
    ```
 
-4. **Test with example audio:**
-   - Upload `examples/small-example.m4a`
-   - Wait for transcription
-   - Test playback and sync
-   - Try clicking words to jump
-
-5. **Transcribe your lectures:**
+4. **Transcribe your lectures:**
    - Upload your own audio files
    - Choose appropriate model (base recommended)
    - Review and study with synced audio
@@ -194,6 +177,7 @@ The application is ready for testing with the provided example files:
 8. **Keyboard shortcuts** for power users
 9. **Model caching** for faster subsequent transcriptions
 10. **Date-based organization** for easy management
+11. **Automatic GPU acceleration** (NVIDIA, Apple Silicon)
 
 ---
 
@@ -234,7 +218,7 @@ The application is complete, tested for syntax, and ready for the user to:
 - All code follows PEP 8 style guidelines
 - Error handling implemented throughout
 - Comprehensive documentation provided
-- Example audio files included for testing
 - Cross-platform compatibility ensured
+- Automatic GPU acceleration for supported hardware
 
 **Built with ❤️ for students who want to review their lectures effectively**

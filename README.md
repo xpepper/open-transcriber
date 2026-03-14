@@ -453,18 +453,18 @@ Then open `http://localhost:5000` in your browser.
 
 After installation, verify everything works:
 
-1. **Check the application is running:**
-   - Open your browser to `http://localhost:5000`
-   - You should see the Open Transcriber interface with a library view
+  1. **Check the application is running:**
+    - Open your browser to `http://localhost:5000`
+    - You should see the Open Transcriber interface with a library view
 
-2. **Test with example audio:**
-   - Click "+ Upload New"
-   - Select "base" model
-   - Navigate to `examples/small-example.m4a`
-   - Wait for transcription (~30-60 seconds)
-   - Click "View" to see the synchronized player
+  2. **Test with your own audio:**
+    - Click "+ Upload New"
+    - Select "base" model
+    - Upload an audio file (MP3, M4A, WAV, etc.)
+    - Wait for transcription to complete
+    - Click "View" to see the synchronized player
 
-3. **Verify all features:**
+  3. **Verify all features:**
    - ✅ Audio plays correctly
    - ✅ Words highlight during playback
    - ✅ Clicking words jumps to that moment
@@ -748,7 +748,6 @@ open-transcriber/
 ├── data/                # Stored transcriptions
 │   └── transcriptions/
 │       └── 2025-03-14/  # Organized by date
-├── examples/            # Example audio files
 ├── uploads/             # Temporary upload location
 ├── requirements.txt
 ├── setup.py             # Installation script
