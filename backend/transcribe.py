@@ -126,7 +126,10 @@ def load_model(model_name: str = "base"):
 
 
 def transcribe_audio(
-    file_path: str, model_name: str = "base", language: Optional[str] = None, word_timestamps: bool = True
+    file_path: str,
+    model_name: str = "base",
+    language: Optional[str] = None,
+    word_timestamps: bool = True,
 ) -> Dict[str, Any]:
     """
     Transcribe an audio file using Whisper
@@ -144,17 +147,17 @@ def transcribe_audio(
 
     # Load model
     model = load_model(model_name)
-    
+
     # Check if we should use CPU for this model on MPS
     # Medium and large models often have numerical stability issues on MPS
     use_cpu_for_model = DEVICE == "mps" and model_name in ["medium", "large-v3"]
-    
+
     original_device = model.device
     if use_cpu_for_model:
         print(f"⚠️  MPS has numerical stability issues with {model_name} model")
         print(f"   Falling back to CPU for transcription...")
         model = model.to("cpu")
-    
+
     # Check if using MPS (Apple Silicon) for word timestamps
     # MPS doesn't support float64 which is needed for word alignment
     # This is a limitation of Whisper's DTW algorithm
@@ -172,7 +175,9 @@ def transcribe_audio(
             # Due to float64 requirement in Whisper's DTW implementation
             print("⚠️  MPS limitation: Word timestamps not supported on Apple Silicon")
             print("   Transcribing with segment timestamps only...")
-            print("   💡 You can still click on segments to jump to that part of the audio")
+            print(
+                "   💡 You can still click on segments to jump to that part of the audio"
+            )
             print("   💡 For word-level sync, use CPU (slower) or smaller models")
             result = model.transcribe(
                 file_path,
@@ -196,14 +201,21 @@ def transcribe_audio(
                 language=language,
                 verbose=False,
             )
-    
+
     # Move model back to original device if we moved it
     if use_cpu_for_model and original_device != "cpu":
         model = model.to(original_device)
-    
-    segments_count = len(result.get('segments', []))
-    has_words = result.get('segments', []) and 'words' in result['segments'][0] if segments_count > 0 else False
-    print(f"Transcription complete: {segments_count} segments" + (f" with word timestamps" if has_words else ""))
+
+    segments_count = len(result.get("segments", []))
+    has_words = (
+        result.get("segments", []) and "words" in result["segments"][0]
+        if segments_count > 0
+        else False
+    )
+    print(
+        f"Transcription complete: {segments_count} segments"
+        + (f" with word timestamps" if has_words else "")
+    )
 
     return result
 
