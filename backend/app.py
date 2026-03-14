@@ -21,6 +21,7 @@ from storage import (
     save_temp_file,
     cleanup_temp_file,
     get_audio_path,
+    TRANSCRIPTIONS_DIR,
 )
 from transcribe import transcribe_audio, get_available_models, detect_language
 from utils import is_audio_file, format_duration, format_date
@@ -74,12 +75,24 @@ def api_get_transcription(transcription_id):
 def api_get_audio(transcription_id):
     """Get the audio file for a transcription"""
     try:
+        print(f"Fetching audio for transcription: {transcription_id}")
         audio_path = get_audio_path(transcription_id)
+
+        print(f"Audio path result: {audio_path}")
+
         if audio_path and audio_path.exists():
+            print(f"Sending audio file: {audio_path}")
             return send_file(str(audio_path))
         else:
-            return jsonify({"error": "Audio file not found"}), 404
+            print(f"Audio file not found for transcription: {transcription_id}")
+            return jsonify(
+                {"error": "Audio file not found", "transcription_id": transcription_id}
+            ), 404
     except Exception as e:
+        print(f"Error serving audio: {e}")
+        import traceback
+
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -175,6 +188,18 @@ def api_delete_transcription(transcription_id):
             return jsonify({"error": "Transcription not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/health", methods=["GET"])
+def api_health():
+    """Health check endpoint"""
+    return jsonify(
+        {
+            "status": "healthy",
+            "transcriptions_dir": str(TRANSCRIPTIONS_DIR),
+            "exists": TRANSCRIPTIONS_DIR.exists(),
+        }
+    )
 
 
 @app.route("/api/models", methods=["GET"])
