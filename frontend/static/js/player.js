@@ -39,18 +39,46 @@ function renderTranscript(segments) {
         return;
     }
     
-    container.innerHTML = segments.map((segment, idx) => `
-        <div class="segment" data-segment-id="${idx}" data-start="${segment.start}" data-end="${segment.end}">
-            ${segment.words.map(word => `
-                <span class="word" 
-                      data-start="${word.start}" 
-                      data-end="${word.end}"
-                      data-word="${escapeHtml(word.word)}">
-                    ${escapeHtml(word.word)}
-                </span>
-            `).join('')}
-        </div>
-    `).join('');
+    // Check if segments have word timestamps
+    const hasWordTimestamps = segments.some(seg => seg.words && seg.words.length > 0);
+    
+    if (!hasWordTimestamps) {
+        // Render at segment level only
+        console.log('No word timestamps - rendering at segment level');
+        container.innerHTML = segments.map((segment, idx) => `
+            <div class="segment segment-clickable" 
+                 data-segment-id="${idx}" 
+                 data-start="${segment.start}" 
+                 data-end="${segment.end}"
+                 title="Click to jump to ${formatTime(segment.start)}">
+                ${escapeHtml(segment.text)}
+            </div>
+        `).join('');
+        
+        // Add click handlers for segments
+        container.querySelectorAll('.segment-clickable').forEach(seg => {
+            seg.addEventListener('click', () => {
+                const start = parseFloat(seg.dataset.start);
+                const audio = document.getElementById('audio-player');
+                audio.currentTime = start;
+                audio.play().catch(err => console.error('Error playing:', err));
+            });
+        });
+    } else {
+        // Render at word level
+        container.innerHTML = segments.map((segment, idx) => `
+            <div class="segment" data-segment-id="${idx}" data-start="${segment.start}" data-end="${segment.end}">
+                ${segment.words.map(word => `
+                    <span class="word" 
+                          data-start="${word.start}" 
+                          data-end="${word.end}"
+                          data-word="${escapeHtml(word.word)}">
+                        ${escapeHtml(word.word)}
+                    </span>
+                `).join('')}
+            </div>
+        `).join('');
+    }
 }
 
 // Setup Audio Load Handlers
@@ -133,15 +161,18 @@ function handleTimeUpdate() {
     document.querySelectorAll('.word.active').forEach(el => {
         el.classList.remove('active');
     });
+    document.querySelectorAll('.segment-clickable.active').forEach(el => {
+        el.classList.remove('active');
+    });
     
-    // Find current word
-    const currentWord = findWordAtTime(currentTime);
+    // Find current word or segment
+    const currentElement = findWordAtTime(currentTime);
     
-    if (currentWord) {
-        currentWord.classList.add('active');
+    if (currentElement) {
+        currentElement.classList.add('active');
         
         // Scroll into view if needed
-        scrollWordIntoView(currentWord);
+        scrollWordIntoView(currentElement);
     }
     
     // Update time display
@@ -164,38 +195,60 @@ function handleLoadedMetadata() {
 
 // Find Word at Time
 function findWordAtTime(time) {
+    // First check if we have word-level timestamps
     const words = document.querySelectorAll('.word');
-    let closestWord = null;
-    let minDiff = Infinity;
-    
-    words.forEach(word => {
-        const start = parseFloat(word.dataset.start);
-        const end = parseFloat(word.dataset.end);
+    if (words.length > 0) {
+        let closestWord = null;
+        let minDiff = Infinity;
         
-        // Check if time is within word range
-        if (time >= start && time <= end) {
-            return word;
+        words.forEach(word => {
+            const start = parseFloat(word.dataset.start);
+            const end = parseFloat(word.dataset.end);
+            
+            // Check if time is within word range
+            if (time >= start && time <= end) {
+                return word;
+            }
+            
+            // Find closest word if not in range
+            const diff = Math.min(Math.abs(time - start), Math.abs(time - end));
+            if (diff < minDiff && diff < 0.5) {
+                minDiff = diff;
+                closestWord = word;
+            }
+        });
+        
+        // If we found a word in range, return it
+        for (const word of words) {
+            const start = parseFloat(word.dataset.start);
+            const end = parseFloat(word.dataset.end);
+            if (time >= start && time <= end) {
+                return word;
+            }
         }
         
-        // Find closest word if not in range
-        const diff = Math.min(Math.abs(time - start), Math.abs(time - end));
-        if (diff < minDiff && diff < 0.5) {
-            minDiff = diff;
-            closestWord = word;
-        }
-    });
-    
-    // If we found a word in range, return it
-    for (const word of words) {
-        const start = parseFloat(word.dataset.start);
-        const end = parseFloat(word.dataset.end);
-        if (time >= start && time <= end) {
-            return word;
-        }
+        return closestWord;
     }
     
-    // Otherwise return closest word
-    return closestWord;
+    // Fall back to segment-level highlighting
+    const segments = document.querySelectorAll('.segment-clickable');
+    if (segments.length > 0) {
+        let closestSegment = null;
+        let minDiff = Infinity;
+        
+        segments.forEach(segment => {
+            const start = parseFloat(segment.dataset.start);
+            const end = parseFloat(segment.dataset.end);
+            
+            if (time >= start && time <= end) {
+                closestSegment = segment;
+            }
+        });
+        
+        return closestSegment;
+    }
+    
+    return null;
 }
 
 // Scroll Word into View

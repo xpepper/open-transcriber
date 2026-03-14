@@ -308,6 +308,23 @@ audio {
     background: #f5f5f5;
 }
 
+.segment-clickable {
+    cursor: pointer;
+    border-left: 3px solid var(--primary-color);
+    padding-left: 16px;
+}
+
+.segment-clickable:hover {
+    background: #e3f2fd;
+    border-left-color: var(--primary-hover);
+}
+
+.segment-clickable.active {
+    background: var(--primary-color);
+    color: white;
+    border-left-color: var(--primary-hover);
+}
+
 .word {
     cursor: pointer;
     padding: 2px 4px;

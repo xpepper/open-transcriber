@@ -150,6 +150,7 @@ def transcribe_audio(
 
     # Check if using MPS (Apple Silicon) for word timestamps
     # MPS doesn't support float64 which is needed for word alignment
+    # This is a limitation of Whisper's DTW algorithm
     original_device = model.device
 
     if not word_timestamps:
@@ -160,32 +161,21 @@ def transcribe_audio(
             language=language,
             verbose=False,
         )
-    elif DEVICE == "mps" and model_name in ["small", "medium", "large-v3"]:
-        print("⚠️  MPS has limited word timestamp support for large models")
-        print("   Attempting transcription with word timestamps...")
-        try:
-            result = model.transcribe(
-                file_path,
-                word_timestamps=True,
-                language=language,
-                verbose=False,
-            )
-        except TypeError as e:
-            if "float64" in str(e):
-                print("   MPS doesn't support word timestamps for this model")
-                print("   Falling back to CPU for alignment (slower)...")
-                model = model.to("cpu")
-                result = model.transcribe(
-                    file_path,
-                    word_timestamps=True,
-                    language=language,
-                    verbose=False,
-                )
-                model = model.to(original_device)
-            else:
-                raise e
+    elif DEVICE == "mps":
+        # MPS doesn't support word timestamps at all (any model)
+        # Due to float64 requirement in Whisper's DTW implementation
+        print("⚠️  MPS limitation: Word timestamps not supported on Apple Silicon")
+        print("   Transcribing with segment timestamps only...")
+        print("   💡 You can still click on segments to jump to that part of the audio")
+        print("   💡 For word-level sync, use CPU (slower) or smaller models")
+        result = model.transcribe(
+            file_path,
+            word_timestamps=False,
+            language=language,
+            verbose=False,
+        )
     else:
-        # Transcribe with word-level timestamps
+        # Transcribe with word-level timestamps (CUDA or CPU)
         result = model.transcribe(
             file_path,
             word_timestamps=True,
